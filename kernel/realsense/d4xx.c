@@ -1861,8 +1861,9 @@ static int ds5_send_hwmc(struct ds5 *state,
 			cmdLen,	cmd->param1, cmd->param2, cmd->param3, cmd->param4);
 
 	ds5_raw_write_with_check(state, DS5_HWMC_DATA, cmd, cmdLen);
-	
+	msleep_range(4);
 	ds5_write_with_check(state, DS5_HWMC_EXEC, 0x01); /* execute cmd */
+    msleep_range(4);
 
 	return 0;
 }
