@@ -1342,7 +1342,7 @@ static const struct ds5_format ds5_y_formats_40x[]
             .resolutions = d40x_calibration_sizes,
         },
         {
-            .data_type = GMSL_CSI_DT_YUV422_8, /* UYVY - RGB through IR */
+            .data_type = GMSL_CSI_DT_CUSTOM_IR_RGB_16, /* UYVY - RGB through IR */
             .mbus_code = MEDIA_BUS_FMT_UYVY8_1X16,
             .n_resolutions = ARRAY_SIZE( y8_40x_sizes ),
             .resolutions = y8_40x_sizes,
@@ -2015,10 +2015,13 @@ static int ds5_configure( struct ds5 * state )
     /*
      * Set depth stream Z16 data type as 0x31
      * Set IR stream Y8I data type as 0x32
+     * Set IR stream RGB-through-IR data type as 0x2F
      */
     if( state->is_depth && fmt != 0 )
         ret = ds5_write( state, dt_addr, 0x31 );
-    else if( state->is_y8 && fmt != 0 && sensor->config.format->data_type == GMSL_CSI_DT_YUV422_8 )
+    else if( state->is_y8 && fmt != 0
+             && ( sensor->config.format->data_type == GMSL_CSI_DT_YUV422_8
+                  || sensor->config.format->data_type == GMSL_CSI_DT_CUSTOM_IR_RGB_16 ) )
     {
         if( sensor->config.format->mbus_code == MEDIA_BUS_FMT_VYUY8_1X16 )
         {
