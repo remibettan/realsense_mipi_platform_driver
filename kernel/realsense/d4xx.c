@@ -1343,7 +1343,7 @@ static const struct ds5_format ds5_y_formats_40x[]
         },
         {
             .data_type = GMSL_CSI_DT_CUSTOM_IR_RGB_16, /* UYVY - RGB through IR */
-            .mbus_code = MEDIA_BUS_FMT_UYVY8_1X16,
+            .mbus_code = MEDIA_BUS_FMT_UYVY8_2X8,
             .n_resolutions = ARRAY_SIZE( y8_40x_sizes ),
             .resolutions = y8_40x_sizes,
         } };
@@ -1714,6 +1714,7 @@ static unsigned int mbus_code_to_mipi( u32 code )
     case MEDIA_BUS_FMT_YUYV10_1X20:
         return MIPI_CSI2_TYPE_YUV422_10;
     case MEDIA_BUS_FMT_UYVY8_1X16:
+    case MEDIA_BUS_FMT_UYVY8_2X8:
     case MEDIA_BUS_FMT_YUYV8_1X16:
     case MEDIA_BUS_FMT_VYUY8_1X16:
         return MIPI_CSI2_TYPE_YUV422_8;
@@ -2030,7 +2031,7 @@ static int ds5_configure( struct ds5 * state )
              */
             ret = ds5_write( state, dt_addr, GMSL_CSI_DT_CUSTOM_Y8I_16 );
         }
-        else if( sensor->config.format->mbus_code == MEDIA_BUS_FMT_UYVY8_1X16 )
+        else if( sensor->config.format->mbus_code == MEDIA_BUS_FMT_UYVY8_2X8 )
         {
             /* This is the custom RGB through IR format -
              * telling FW to enable "etMipiDataType_UserDefined0_IR_RGB"
