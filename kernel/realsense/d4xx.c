@@ -3091,6 +3091,42 @@ static int ds5_hw_reset_with_recovery(struct ds5 *state)
 		}
 	}
 
+#ifdef CONFIG_VIDEO_D4XX_SERDES
+	/*
+	 * D585 prototype-only workaround for the serializer/control-path recovery
+	 * issue post-DFU manifestation. Restore the serializer alias and control
+	 * tunnel before the first camera I2C access after the SDK-triggered HW reset.
+	 */
+	if (post_dfu_reset) {
+		struct ds5 *primary = state->ds5_dev->ds5_primary;
+
+		if (!primary || !primary->dser_ops->recover_link)
+			return -ENODEV;
+
+		mutex_lock(&serdes_lock__);
+		ret = primary->ser_ops->reset_control(primary->ser_dev);
+		if (!ret)
+			ret = primary->dser_ops->recover_link(primary->dser_dev,
+						      primary->ser_dev,
+						      primary->gmsl_link);
+		if (!ret)
+			ret = primary->ser_ops->setup_control(primary->ser_dev);
+		if (!ret)
+			ret = primary->ser_ops->init_settings(primary->ser_dev);
+		mutex_unlock(&serdes_lock__);
+		if (ret) {
+			dev_err(&state->client->dev,
+				"%s(): pre-HW-reset D585 SerDes recovery failed (%d)\n",
+				__func__, ret);
+			return ret;
+		}
+
+		dev_info(&state->client->dev,
+			 "%s(): pre-HW-reset D585 GMSL control path recovered\n",
+			 __func__);
+	}
+#endif
+
 	/* 1. Stop active streams on the device before reset.
 	 *    This ensures FW and SERDES are in a clean state.
 	 *
